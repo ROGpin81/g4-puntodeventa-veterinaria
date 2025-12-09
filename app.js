@@ -46,14 +46,22 @@ const middleware = (req, res, next) =>{
 }
 
 // Autorizacion del Header
-const authMiddleware = (erq, res, next)=>{
+const authMiddleware = (req, res, next)=>{
     const authHeader = req.headers['authorization'];
 
     if(!authHeader){
         return res.status(401).json({status:401, message:'El token es obligatorio'});
     }
 
-    next();
+    const token = authHeader.split('')[1];
+
+    jwt.verify(token, SECRET_KEY, (err, user)=>{
+        if(err){
+            return res.status(401).json({status:401, message: 'Token invalido'});
+        }
+
+        next();
+    });
 }
 
 app.get('/test', middleware, (req, res)=>{
@@ -97,7 +105,7 @@ app.post('/login',async (req, res)=>{
              return res.status(401).json({status:401, message:'Credenciales invalidas'});
         }
 
-        const token = jwt.sign({username: user.username},SECRET_KEY,{expiresIn: '5m'});
+        const token = jwt.sign({username: user.username},SECRET_KEY,{expiresIn: '1h'});
         res.status(200).json({status:200, message:'success', data: token});
 
     });
@@ -124,8 +132,18 @@ app.get('/usuarios',(req, res)=>{
     })
 });
  
+
+
+
+// Administracion de usuarios
 app.post('/usuarios',(req,res)=>{
     const usuarios = req.body;
+
+    const passwordHash = user.password;
+    const saltRound = 10;
+    const passwordHash = await bcrypt.hash(plainText,saltRound);
+
+
     if(!usuarios.username || !usuarios.email || !usuarios.password ){
         res.status(200).json({status:400,message:'Los parametros datos son requeridos '});
     }
@@ -172,6 +190,7 @@ app.put('/usuarios/:idusuarios', (req, res)=>{
         })
     }
 });
+
 
 
 app.get('/llamada',(req,res)=>{
