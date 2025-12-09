@@ -1,8 +1,10 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = 3000;
+const SECRET_KEY = 'pDucMAA7mzYhq17oSK2ipgmTuO2k30lkjhv1dIZt';
 
 app.use(express.json());
 
@@ -95,7 +97,8 @@ app.post('/login',async (req, res)=>{
              return res.status(401).json({status:401, message:'Credenciales invalidas'});
         }
 
-        res.status(200).json({status:200, message:'success', data: 'token'});
+        const token = jwt.sign({username: user.username},SECRET_KEY,{expiresIn: '5m'});
+        res.status(200).json({status:200, message:'success', data: token});
 
     });
 });
