@@ -143,7 +143,6 @@ app.post('/usuarios',(req,res)=>{
     const saltRound = 10;
     const passwordHash = await bcrypt.hash(plainText,saltRound);
 
-
     if(!usuarios.username || !usuarios.email || !usuarios.password ){
         res.status(200).json({status:400,message:'Los parametros datos son requeridos '});
     }
